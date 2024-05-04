@@ -1,6 +1,8 @@
 package io.crative.engine.window;
 
+import io.crative.engine.inputs.KeyListener;
 import io.crative.engine.inputs.MouseListener;
+import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 
@@ -16,12 +18,19 @@ public class Window
     private final String title;
     private long glfwWindow;
 
+    private float r, g, b, a;
+    private boolean fadeToBlack;
+
     private static Window window = null;
 
     private Window() {
         this.width = 1920;
         this.height = 1080;
         this.title = "Engine - Dev";
+        this.r = 0.2f;
+        this.g = 0.18f;
+        this.b = 0.17f;
+        this.a = 1.0f;
     }
 
     // So that only one window exists
@@ -34,7 +43,7 @@ public class Window
     }
 
     public void run() {
-        System.out.println("Version of LWJGL : " + org.lwjgl.Version.getVersion());
+        System.out.println("Version of LWJGL : " + Version.getVersion());
 
         init();
         loop();
@@ -70,6 +79,11 @@ public class Window
 
         // MouseListener setup
         glfwSetCursorPosCallback(glfwWindow, MouseListener::mousePosCallback);
+        glfwSetMouseButtonCallback(glfwWindow, MouseListener::mouseButtonCallback);
+        glfwSetScrollCallback(glfwWindow, MouseListener::mouseScrollCallback);
+
+        // KeyListener setup
+        glfwSetKeyCallback(glfwWindow, KeyListener::keyCallback);
 
         // Make the OpenGL context current
         glfwMakeContextCurrent(glfwWindow);
@@ -95,8 +109,19 @@ public class Window
             // Poll events
             glfwPollEvents();
 
-            glClearColor(0.0f, 0.0f, 0.f, 1.0f);
+            // Set background color
+            glClearColor(r,g,b,a);
             glClear(GL_COLOR_BUFFER_BIT);
+
+            if(fadeToBlack){
+                r = Math.max(r - 0.01f, 0);
+                g = Math.max(g - 0.01f, 0);
+                b = Math.max(b- 0.01f, 0);
+                a = Math.max(a - 0.01f, 0);
+            }
+
+            if(KeyListener.isKeyPressed(GLFW_KEY_SPACE))
+                fadeToBlack = true;
 
             glfwSwapBuffers(glfwWindow);
         }
