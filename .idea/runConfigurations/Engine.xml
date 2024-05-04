@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Engine" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="io.crative.Main" />
+    <module name="game-engine-2d.main" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
