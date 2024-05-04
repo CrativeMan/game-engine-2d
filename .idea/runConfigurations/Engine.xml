@@ -2,6 +2,7 @@
   <configuration default="false" name="Engine" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="io.crative.engine.Main" />
     <module name="game-engine-2d.main" />
+    <option name="VM_PARAMETERS" value="-ea" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>
