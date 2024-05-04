@@ -1,2 +1,3 @@
 rootProject.name = 'game-engine-2d'
+include 'assets'
 

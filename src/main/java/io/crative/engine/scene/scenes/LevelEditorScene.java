@@ -1,39 +1,180 @@
 package io.crative.engine.scene.scenes;
 
-import io.crative.engine.inputs.KeyListener;
 import io.crative.engine.scene.Scene;
-import io.crative.engine.window.Window;
+import org.lwjgl.BufferUtils;
 
-import java.awt.event.KeyEvent;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+
+import static org.lwjgl.opengl.GL20.*;
+import static org.lwjgl.opengl.GL30.glBindVertexArray;
+import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 
 public class LevelEditorScene extends Scene {
-    private boolean changingScene = false;
-    private float timeToChangeScene = 2.0f;
+
+    private String vertexShaderSource = "#version 330 core\n" +
+            "layout (location = 0) in vec3 attributePos;\n" +
+            "layout (location = 1) in vec4 attributeColor;\n" +
+            "\n" +
+            "out vec4 fragmentColor;\n" +
+            "\n" +
+            "void main()\n" +
+            "{\n" +
+            "    fragmentColor = attributeColor;\n" +
+            "    gl_Position = vec4(attributePos, 1.0);\n" +
+            "}";
+
+    private String fragmentShaderSource = "#version 330 core\n" +
+            "\n" +
+            "in vec4 fragmentColor;\n" +
+            "\n" +
+            "out vec4 color;\n" +
+            "\n" +
+            "void main()\n" +
+            "{\n" +
+            "    color = fragmentColor;\n" +
+            "}";
+
+    private int vertexID, fragmentID, shaderProgram;
+
+    private float[] vertexArray = {
+            // position             // color
+            0.5f,  -0.5f, 0.0f,     1.0f, 0.0f, 0.0f, 1.0f, // Bottom right 0
+            -0.5f, 0.5f,  0.0f,     0.0f, 1.0f, 0.0f, 1.0f, // Top left     1
+            0.5f,  0.5f,  0.0f,     1.0f, 0.0f, 1.0f, 1.0f, // Top right    2
+            -0.5f, -0.5f, 0.0f,     1.0f, 1.0f, 0.0f, 1.0f  // Bottom left  3
+    };
+
+    //! IMPORTANT: Must be in counter-clockwise order
+    private int[] elementArray = {
+            /*
+                x   x
+
+                x   x
+             */
+            2,1,0, // Top right triangle
+            0,1,3, // Bottom left triangle
+    };
+
+    private int vaoID, vboID, eboID;
 
     public LevelEditorScene() {
-        System.out.println("Inside LevelEditorScene");
+
+    }
+
+    @Override
+    public void init()
+    {
+        //============================
+        // Compile and link shaders
+        //============================
+
+        // Load and compile vertex shader
+        vertexID = glCreateShader(GL_VERTEX_SHADER);
+        // Pass the shader source to the GPU
+        glShaderSource(vertexID, vertexShaderSource);
+        glCompileShader(vertexID);
+
+        // Check for errors in compilations process
+        int success = glGetShaderi(vertexID, GL_COMPILE_STATUS);
+        if (success == GL_FALSE)
+        {
+            int len = glGetShaderi(vertexID, GL_INFO_LOG_LENGTH); // Gets the length of the error message
+            System.out.println("ERROR: 'default.glsl'\n\tVertex shader compilation failed.");
+            System.out.println(glGetShaderInfoLog(vertexID, len));
+            assert false : "";
+        }
+
+        // Load and compile fragment shader
+        fragmentID = glCreateShader(GL_FRAGMENT_SHADER);
+        // Pass the shader source to the GPU
+        glShaderSource(fragmentID, fragmentShaderSource);
+        glCompileShader(fragmentID);
+
+        // Check for errors in compilations process
+        success = glGetShaderi(fragmentID, GL_COMPILE_STATUS);
+        if (success == GL_FALSE)
+        {
+            int len = glGetShaderi(fragmentID, GL_INFO_LOG_LENGTH); // Gets the length of the error message
+            System.out.println("ERROR: 'default.glsl'\n\tFragment shader compilation failed.");
+            System.out.println(glGetShaderInfoLog(fragmentID, len));
+            assert false : "";
+        }
+
+        // Link shaders
+        shaderProgram = glCreateProgram();
+        glAttachShader(shaderProgram, vertexID);
+        glAttachShader(shaderProgram, fragmentID);
+        glLinkProgram(shaderProgram);
+
+        // Check for linking errors
+        success = glGetProgrami(shaderProgram, GL_LINK_STATUS);
+        if(success == GL_FALSE)
+        {
+            int len = glGetProgrami(shaderProgram, GL_INFO_LOG_LENGTH);
+            System.out.println("ERROR: 'default.glsl'\n\tLinking shaders failed.");
+            System.out.println(glGetProgramInfoLog(shaderProgram, len));
+            assert false : "";
+        }
+
+        //==============================================================
+        // Generate VAO, VBO and EBO buffer objects, and send to GPU
+        //==============================================================
+        vaoID = glGenVertexArrays();
+        glBindVertexArray(vaoID);
+
+        // Create a float buffer of vertices
+        FloatBuffer vertexBuffer = BufferUtils.createFloatBuffer(vertexArray.length);
+        vertexBuffer.put(vertexArray).flip();
+
+        // Create VBO upload the vertex buffer
+        vboID = glGenBuffers();
+        glBindBuffer(GL_ARRAY_BUFFER, vboID);
+        //* take an array buffer, this buffer, we only draw it once
+        glBufferData(GL_ARRAY_BUFFER, vertexBuffer, GL_STATIC_DRAW);
+
+        // Create the indices and upload
+        IntBuffer elementBuffer = BufferUtils.createIntBuffer(elementArray.length);
+        elementBuffer.put(elementArray).flip();
+
+        eboID = glGenBuffers();
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eboID);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementBuffer, GL_STATIC_DRAW);
+
+        // Add the vertex attribute pointers
+        int positionsSize = 3;
+        int colorSize = 4;
+        int floatSizeBytes = 4; // Storage of a float in java
+        int vertexSizeBytes = (positionsSize + colorSize) * floatSizeBytes;
+
+        glVertexAttribPointer(0, positionsSize, GL_FLOAT, false, vertexSizeBytes, 0);
+        glEnableVertexAttribArray(0);
+
+        glVertexAttribPointer(1, colorSize, GL_FLOAT, false, vertexSizeBytes, positionsSize * floatSizeBytes);
+        glEnableVertexAttribArray(1);
+
     }
 
     @Override
     public void update(float deltaTime)
     {
-        // System.out.println("FPS: " + (1.0f/deltaTime));
+        // Bind shader program
+        glUseProgram(shaderProgram);
+        // Bind the VAO that we're using
+        glBindVertexArray(vaoID);
 
-        if(!changingScene && KeyListener.isKeyPressed(KeyEvent.VK_SPACE))
-            changingScene = true;
+        // Enable the vertex attribute pointers
+        glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
 
-        if(changingScene && timeToChangeScene > 0)
-        {
-            // Decrement the animation time
-            timeToChangeScene -= deltaTime;
-            // Fade window to black
-            Window.get().red -= deltaTime * 5.0f;
-            Window.get().green -= deltaTime * 5.0f;
-            Window.get().blue -= deltaTime * 5.0f;
-        } else if (changingScene)
-        {
-            // Change ot LevelScene
-            Window.changeScene(1);
-        }
+        glDrawElements(GL_TRIANGLES, elementArray.length, GL_UNSIGNED_INT, 0);
+
+        // Unbind everything
+        glDisableVertexAttribArray(0);
+        glDisableVertexAttribArray(1);
+
+        glBindVertexArray(0);
+
+        glUseProgram(0);
     }
 }

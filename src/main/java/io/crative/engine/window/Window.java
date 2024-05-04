@@ -45,11 +45,11 @@ public class Window
         {
             case 0 -> {
                 currentScene = new LevelEditorScene();
-                // currentScene.init();
+                currentScene.init();
             }
             case 1 -> {
                 currentScene = new LevelScene();
-                // currentScene.init();
+                currentScene.init();
             }
             default -> {
                 assert false: "Unknown scene : " + newScene;

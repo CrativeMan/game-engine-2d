@@ -9,10 +9,13 @@ public class LevelScene extends Scene
 {
 
     public LevelScene() {
-        System.out.println("Inside LevelScene");
-        Window.get().red = BG_RED;
-        Window.get().green = BG_GREEN;
-        Window.get().blue = BG_BLUE;
+
+    }
+
+    @Override
+    public void init()
+    {
+
     }
 
     @Override
