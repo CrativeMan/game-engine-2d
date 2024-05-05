@@ -1,12 +1,14 @@
 package io.crative.engine.render;
 
+import org.joml.Matrix4f;
+import org.lwjgl.BufferUtils;
+
 import java.io.IOException;
+import java.nio.FloatBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import static org.lwjgl.opengl.GL11.GL_FALSE;
 import static org.lwjgl.opengl.GL20.*;
-import static org.lwjgl.opengl.GL20.glGetShaderInfoLog;
 
 public class Shader
 {
@@ -122,4 +124,14 @@ public class Shader
     {
         glUseProgram(0);
     }
+
+    public void uploadMatrix4f(String varName, Matrix4f matrix4)
+    {
+        int varLocation = glGetUniformLocation(shaderProgramID, varName); // gets the location of the uniform variable
+        // creates a buffer with the size of the matrix (4x4 | 16)
+        FloatBuffer matrixBuffer = BufferUtils.createFloatBuffer(16);
+        matrix4.get(matrixBuffer);
+        glUniformMatrix4fv(varLocation, false, matrixBuffer); // Will be explained in the next video
+    }
+
 }
