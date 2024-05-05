@@ -3,6 +3,7 @@ package io.crative.engine.scene.scenes;
 import io.crative.engine.render.Camera;
 import io.crative.engine.render.Shader;
 import io.crative.engine.scene.Scene;
+import io.crative.util.Time;
 import org.joml.Vector2f;
 import org.lwjgl.BufferUtils;
 
@@ -17,7 +18,7 @@ public class LevelEditorScene extends Scene
 {
     private float[] vertexArray = {
             // position               // color
-            100.5f, 0.5f,   0.0f,     1.0f, 0.0f, 0.0f, 1.0f, // Bottom right 0
+            100.5f, 0.54f,   0.0f,     1.0f, 0.0f, 0.0f, 1.0f, // Bottom right 0
             0.5f,   100.5f, 0.0f,     0.0f, 1.0f, 0.0f, 1.0f, // Top left     1
             100.5f, 100.5f, 0.0f,     1.0f, 0.0f, 1.0f, 1.0f, // Top right    2
             0.5f,   0.5f,   0.0f,     1.0f, 1.0f, 0.0f, 1.0f  // Bottom left  3
@@ -90,11 +91,13 @@ public class LevelEditorScene extends Scene
     @Override
     public void update(float deltaTime)
     {
-        camera.position.x -= deltaTime * 50.0f;
+        camera.position.x -= deltaTime * 20.0f;
+        camera.position.y -= deltaTime * 20.0f;
         defaultShader.use();
 
         defaultShader.uploadMatrix4f("uProjection", camera.getProjectionMatrix());
         defaultShader.uploadMatrix4f("uView", camera.getViewMatrix());
+        defaultShader.uploadFloat("uTime", Time.getTime());
 
         // Bind the VAO that we're using
         glBindVertexArray(vaoID);
