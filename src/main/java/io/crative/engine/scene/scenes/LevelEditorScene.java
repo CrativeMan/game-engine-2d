@@ -1,5 +1,8 @@
 package io.crative.engine.scene.scenes;
 
+import io.crative.engine.ecs.GameObject;
+import io.crative.engine.ecs.components.FontRenderComponent;
+import io.crative.engine.ecs.components.SpriteRendererComponent;
 import io.crative.engine.render.Texture;
 import io.crative.engine.render.camera.Camera;
 import io.crative.engine.render.Shader;
@@ -44,6 +47,9 @@ public class LevelEditorScene extends Scene
 
     private Texture testTexture;
 
+    GameObject testObj;
+    private boolean first = false;
+
     public LevelEditorScene()
     {
         this.camera = new Camera(new Vector2f());
@@ -52,6 +58,14 @@ public class LevelEditorScene extends Scene
     @Override
     public void init()
     {
+        //? Test gameObj
+        System.out.println("Creating test object");
+        this.testObj = new GameObject("Test Object");
+        this.testObj.addComponent(new SpriteRendererComponent());
+        this.testObj.addComponent(new FontRenderComponent());
+        this.addGameObjectToScene(this.testObj);
+
+
         defaultShader = new Shader("assets/shaders/default.glsl");
         defaultShader.compile();
         this.testTexture = new Texture("assets/images/testImage.png");
@@ -134,5 +148,20 @@ public class LevelEditorScene extends Scene
         glBindVertexArray(0);
 
         defaultShader.detach();
+
+        if(!first)
+        {
+            System.out.println("Creating gameObject on runtime");
+            GameObject gameObject2 = new GameObject("Test Object 2");
+            gameObject2.addComponent(new SpriteRendererComponent());
+            this.addGameObjectToScene(gameObject2);
+            first = true;
+        }
+
+        // Updating game objects
+        for(GameObject gameObject : this.gameObjects)
+        {
+            gameObject.update(deltaTime);
+        }
     }
 }
