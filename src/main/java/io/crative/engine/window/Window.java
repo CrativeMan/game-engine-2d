@@ -155,6 +155,9 @@ public class Window
 
             glfwSwapBuffers(glfwWindow);
 
+            if(KeyListener.isKeyPressed(GLFW_KEY_SPACE))
+                System.exit(0);
+
             // Save the time after an entire loop run
             endTime = Time.getTime();
             // calculate deltaTime

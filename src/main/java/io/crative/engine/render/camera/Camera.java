@@ -1,4 +1,4 @@
-package io.crative.engine.render;
+package io.crative.engine.render.camera;
 
 import org.joml.Matrix4f;
 import org.joml.Vector2f;

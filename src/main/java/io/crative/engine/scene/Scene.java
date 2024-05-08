@@ -1,6 +1,6 @@
 package io.crative.engine.scene;
 
-import io.crative.engine.render.Camera;
+import io.crative.engine.render.camera.Camera;
 
 public abstract class Scene {
 
